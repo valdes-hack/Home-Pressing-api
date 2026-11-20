@@ -5,6 +5,7 @@ import cm.atlanticpalace.pressing.domain.dto.ContactDTO;
 import cm.atlanticpalace.pressing.domain.entity.Article;
 import cm.atlanticpalace.pressing.domain.entity.Commande;
 import cm.atlanticpalace.pressing.domain.entity.ContactMessage;
+import cm.atlanticpalace.pressing.repository.ArticleRepository;
 import cm.atlanticpalace.pressing.repository.CommandeRepository;
 import cm.atlanticpalace.pressing.repository.ContactMessageRepository;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,13 +30,16 @@ import java.util.Optional;
 public class PublicController {
 
     private final CommandeRepository commandeRepository;
+    private final ArticleRepository articleRepository;
     private final ContactMessageRepository contactMessageRepository;
 
     public PublicController(
             CommandeRepository commandeRepository,
+            ArticleRepository articleRepository,
             ContactMessageRepository contactMessageRepository
     ) {
         this.commandeRepository = commandeRepository;
+        this.articleRepository = articleRepository;
         this.contactMessageRepository = contactMessageRepository;
     }
 
@@ -58,6 +63,7 @@ public class PublicController {
         }
 
         Commande cmd = opt.get();
+        List<Article> articles = articleRepository.findByCommande_NumFactureOrderByIdArticleAsc(cmd.getNumFacture());
 
         // Construction du DTO public (sans informations sensibles prix/paiements)
         CommandeTrackingDTO dto = new CommandeTrackingDTO();
@@ -66,16 +72,16 @@ public class PublicController {
         dto.setDateDepot(cmd.getDateDepot());
         dto.setNomAgence(cmd.getAgence() != null ? cmd.getAgence().getNomAgence() : "Agence");
         dto.setCodeAgence(cmd.getAgence() != null ? cmd.getAgence().getCodeAgence() : "N/A");
-        dto.setNbArticles(cmd.getArticles() != null ? cmd.getArticles().size() : 0);
+        dto.setNbArticles(articles != null ? articles.size() : 0);
 
         // Calcul de la progression (pourcentage d'articles prêts)
-        if (cmd.getArticles() != null && !cmd.getArticles().isEmpty()) {
-            long nbPrets = cmd.getArticles().stream()
+        if (articles != null && !articles.isEmpty()) {
+            long nbPrets = articles.stream()
                     .filter(a -> "Prêt".equalsIgnoreCase(a.getStatutArticle()) 
                               || "Retiré".equalsIgnoreCase(a.getStatutArticle())
                               || "Livré".equalsIgnoreCase(a.getStatutArticle()))
                     .count();
-            dto.setProgression(Math.round((nbPrets * 100.0f) / cmd.getArticles().size()));
+            dto.setProgression(Math.round((nbPrets * 100.0f) / articles.size()));
         } else {
             dto.setProgression(0);
         }
