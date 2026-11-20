@@ -1,0 +1,19 @@
+# ==============================================================
+# VARIABLES D'ENVIRONNEMENT BACKEND (Spring Boot - Render & Local)
+# ==============================================================
+
+# Base de données MySQL (Aiven Cloud ou MySQL Local)
+# En local : vide (se connecte par défaut à jdbc:mysql://localhost:3306/atlantic_palace_pressing)
+# Sur Render : l'URL fournie par Aiven (ex: mysql://avnadmin:pass@mysql-xxx.aivencloud.com:port/defaultdb?sslmode=require)
+DB_URL=jdbc:mysql://votre-hote-aiven:port/nom_base?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Africa/Douala
+DB_USERNAME=avnadmin
+DB_PASSWORD=votre_mot_de_passe_aiven
+
+# Port d'écoute (Render fournit automatiquement la variable PORT)
+PORT=8080
+
+# Autorisations CORS (URL de votre frontend Vercel)
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://votre-projet.vercel.app
+
+# Clé secrète JWT
+JWT_SECRET=AtlanticPalacePressingSecretKeyv30YaoundeCamerounIUGEEKeyce2026SecureKey
